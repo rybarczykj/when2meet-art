@@ -1,3 +1,13 @@
+"""
+when2meet-art.py
+Jack Rybarczyk, July 2020
+
+Renders an image to a when2meet calendar.
+See readme for usage instructions.
+
+"""
+
+
 from PIL import Image, ImageOps
 
 from selenium import webdriver
@@ -7,24 +17,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 from time import sleep
-
-
-# trial 1 link: https://www.when2meet.com/?9272145-cDii7
-# trail 2 link: https://www.when2meet.com/?9273442-hcOva
-# trail 3 link: (creeper, bottom right edge cases failed): https://www.when2meet.com/?9273446-RIuto
-# trail 4 link: (creeper, a little better): https://www.when2meet.com/?9273483-fzWRD
-# trial 5 link: Error on edge case of color = 255: https://www.when2meet.com/?9273666-vY7dW
-# Modern day clint: https://www.when2meet.com/?9275454-pNGWD
-# Hibiscus: https://www.when2meet.com/?9275516-sZ8wx
-# 420 Blaze It https://www.when2meet.com/?9275544-zHRN6
-# Ben (first use of half boxes) https://www.when2meet.com/?9281376-zkgqq
-# Modern day clint 2: https://www.when2meet.com/?9281470-Yu8dh
-# Ben 2 (first use of quarter boxs) https://www.when2meet.com/?9282530-ccmrE
-# Simpsons https://www.when2meet.com/?9282752-kvaBP
-# Clint 3: https://www.when2meet.com/?9304127-2J6AV
-# Clint 4: https://www.when2meet.com/?9304196-26mgu
-
-
+import readline
 
 
 
@@ -43,13 +36,16 @@ class user:
         
     def willVisit(self, row, col):
         """ 
-        Records that this bot will visit a certain square
+        Makes a record that this bot will visit a certain square
         """
         self.grid[row][col] = 1
         self.arr.append((row,col))
 
     
     def logIn(self, driver):
+        """
+        Enter Login information
+        """
 
         sleep(2)
 
@@ -65,6 +61,9 @@ class user:
 
 
     def enterAvailability(self, driver):
+        """
+        Enters the bots full availablitiy
+        """
         clicker = ActionChains(driver)
 
         for row in range(self.numRows):
@@ -77,6 +76,11 @@ class user:
     
 
     def fillARow(self, row, driver):
+        """
+        Enters the availability of one row
+        
+        Called by enterAvailability
+        """
         sleep(.1)
         row_arr = self.grid[row]
 
@@ -98,10 +102,10 @@ class user:
 
     def stall(self, driver):
         """
-        This method simply clicks the top left square 10 times
+        This method simply clicks the top left square 10 times.
 
-        To be called at the end of filling out a calender to prevent the last few elements from dissapearing 
-        (was a common issue previously due to leaving too soon).
+        Called and the end of enterAvailablity to prevent the last few elements from dissapearing 
+        (was a common issue previously due to refreshing the sit too soon).
         """
         clicker = ActionChains(driver)
         for i in range(10):
@@ -141,7 +145,6 @@ class photomaker:
         """
         Given an image, turns it into a 2D array which tells how many bots need to 
         visit each square.
-        
         
         """
         height = self.height
@@ -224,31 +227,24 @@ def main():
     IMAGE = input("What's the filename of your image? (Be sure it's in the same folder as this file): ")
     LINK = input("What's the URL of the when2meet you want painted?: ")
 
-    print("Now, let's get the dimensions of our canvas. (It's best if this is roughly similar to the dimensions of the photo): ")
     NUM_HOURS = int(input("Across how many hours in a day does your when2meet span?: "))
     NUM_DAYS = int(input("Across how many days does your when2meet span?: "))
     BOT_COUNT = 6
     maker = photomaker(NUM_HOURS, NUM_DAYS, BOT_COUNT, IMAGE)
-    for row in maker.grid:
-        print(row)
 
-
-    users = maker.users
 
     driver = webdriver.Chrome('./chromedriver')
     driver.get(LINK)
     driver.maximize_window()
 
     try:
-        for user in users:
+        for user in maker.users:
             user.logIn(driver)
             user.enterAvailability(driver)
 
             driver.refresh()
-
-
     except Exception as e:
-        print("exception:", e)
+        print("Something went wrong:", e)
 
 
 
