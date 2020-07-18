@@ -90,7 +90,6 @@ class user:
         # Move cursor to the first element so that we don't start off-screen from the last row
         first = driver.find_element_by_xpath("//div[@data-col='%s'][@data-row='%s']"%(0, row))
         clicker.move_to_element(first).perform()
-        # first.click()
 
 
         for col in range(self.numCols):
@@ -134,9 +133,7 @@ class photomaker:
 
         self.numVisitors = numberOfVisitors
 
-        
-        # self.numVisitors = BOT_COUNT
-        
+                
         self.users = [user(i,numberOfHours,numberOfDays, verticalPrecision) for i in range(self.numVisitors)]
         self.grid = self.gridify()
 
