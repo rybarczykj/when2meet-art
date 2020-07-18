@@ -2,6 +2,10 @@
 
 www.when2meet.com is a simple web-based tool used to collaboratively schedule meetings. This tool takes advantage of the way when2meet presents results, a multi-shaded green gridlike calendar, to make fun pixel art on real schedules.
 
+![Gif of the tool in action](https://media.giphy.com/media/ZZScL3dNZOi3EZrogb/giphy.gif)
+
+
+
 ## How to use
 For now, the only way to use this tool is from the command line, with a few small setup steps (some of which I hope to automate in the future):
 
@@ -24,6 +28,8 @@ The program takes a few minutes to run, because selenium mimics user behavior so
 I don't really expect anybody to use this tool, but just in case I should say this project was made just for fun and is intended to be used as such. I didn't get permission from when2meet to make this tool, so if they find out about this I'm happy to take it down.
 
 Finally, if you use the website a lot, consider making a donation to their paypal (link at the bottom of their website).
+![mike and homer](https://i.imgur.com/XryMC38.png)
+
 
 
 
