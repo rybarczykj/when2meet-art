@@ -27,24 +27,20 @@ from time import sleep
 
 
 
-IMAGE = "gop.jpg"
-PIXEL_COUNT = 8
-BOT_COUNT = 8
-link = "https://www.when2meet.com/?9305356-xoIcn"
-startbot = 0 # Which bot to start at, useful because it crashes halfway through commonly
+
 
 class user:
-    def __init__(self,name, numberOfDays, verticalPrecision):
+    def __init__(self,name, numberOfHours, numberOfDays, verticalPrecision):
         self.name = name
         self.numCols = numberOfDays
-        self.numRows = verticalPrecision * self.numCols
+        self.numRows = verticalPrecision * numberOfHours
         
         # Array of tuples to visit. format: (row, col)
         self.arr = [] 
 
         # Grid, defaulted as 0's where 1's represent squares this bot will visit
         self.grid = [[0 for col in range(self.numCols)] for row in range(self.numRows)] 
-
+        
     def willVisit(self, row, col):
         """ 
         Records that this bot will visit a certain square
@@ -53,47 +49,42 @@ class user:
         self.arr.append((row,col))
 
     
-    def logIn(self, url = link):
-        self.driver = webdriver.Chrome('./chromedriver')
-        self.driver.get(url)
-        self.driver.maximize_window()
+    def logIn(self, driver):
+
         sleep(2)
 
-        enter_name = self.driver.find_element_by_id("name")
+        enter_name = driver.find_element_by_id("name")
         enter_name.send_keys(self.name)
 
-        submit = WebDriverWait(self.driver,30).until(EC.presence_of_element_located(
+        submit = WebDriverWait(driver,30).until(EC.presence_of_element_located(
                  (By.XPATH,'//*[@id="SignIn"]/div/div/input')))
         sleep(2)
-        self.driver.execute_script("arguments[0].click();", submit)
+        driver.execute_script("arguments[0].click();", submit)
         sleep(2)
         
 
 
-    def enterAvailability(self):
-        clicker = ActionChains(self.driver)
+    def enterAvailability(self, driver):
+        clicker = ActionChains(driver)
 
         for row in range(self.numRows):
-            self.fillARow(row)
+            self.fillARow(row, driver)
 
-        self.stall()
+        self.stall(driver)
 
-
-        self.driver.implicitly_wait(5)
         sleep(2)
-        self.driver.quit()            
 
     
 
-    def fillARow(self, row):
+    def fillARow(self, row, driver):
         sleep(.1)
         row_arr = self.grid[row]
 
-        clicker = ActionChains(self.driver)
+        clicker = ActionChains(driver)
 
 
         # Move cursor to the first element so that we don't start off-screen from the last row
-        first = self.driver.find_element_by_xpath("//div[@data-col='%s'][@data-row='%s']"%(0, row))
+        first = driver.find_element_by_xpath("//div[@data-col='%s'][@data-row='%s']"%(0, row))
         clicker.move_to_element(first).perform()
         # first.click()
 
@@ -101,20 +92,20 @@ class user:
         for col in range(self.numCols):
             if row_arr[col] == 1:
                 for i in range(1):
-                    box = self.driver.find_element_by_xpath("//div[@data-col='%s'][@data-row='%s']"%(col, row+i))
+                    box = driver.find_element_by_xpath("//div[@data-col='%s'][@data-row='%s']"%(col, row+i))
                     box.click()
 
 
-    def stall(self):
+    def stall(self, driver):
         """
         This method simply clicks the top left square 10 times
 
         To be called at the end of filling out a calender to prevent the last few elements from dissapearing 
         (was a common issue previously due to leaving too soon).
         """
-        clicker = ActionChains(self.driver)
+        clicker = ActionChains(driver)
         for i in range(10):
-            box = self.driver.find_element_by_xpath("//div[@data-col='%s'][@data-row='%s']"%(0, 0))
+            box = driver.find_element_by_xpath("//div[@data-col='%s'][@data-row='%s']"%(0, 0))
             try:
                 box.click()
             except:
@@ -122,7 +113,7 @@ class user:
 
 class photomaker:
 
-    def __init__(self, numberOfDays, numberOfVisitors, img = IMAGE, verticalPrecision = 4):
+    def __init__(self, numberOfHours, numberOfDays, numberOfVisitors, img, verticalPrecision = 4):
         """
         verticalPrecision:
             Since 1 hour x 1 day = 1 square on when2meet.com, but we also can break up availbility
@@ -134,16 +125,15 @@ class photomaker:
         
         """
         self.image = img
-        # self.users = []
         self.width = numberOfDays
-        self.height = self.width * verticalPrecision
+        self.height = numberOfHours * verticalPrecision
 
         self.numVisitors = numberOfVisitors
 
         
         # self.numVisitors = BOT_COUNT
         
-        self.users = [user(i,self.width, verticalPrecision) for i in range(self.numVisitors)]
+        self.users = [user(i,numberOfHours,numberOfDays, verticalPrecision) for i in range(self.numVisitors)]
         self.grid = self.gridify()
 
 
@@ -231,28 +221,35 @@ class photomaker:
 
 
 def main():
-    maker = photomaker(PIXEL_COUNT, BOT_COUNT, IMAGE)
+    IMAGE = input("What's the filename of your image? (Be sure it's in the same folder as this file): ")
+    LINK = input("What's the URL of the when2meet you want painted?: ")
+
+    print("Now, let's get the dimensions of our canvas. (It's best if this is roughly similar to the dimensions of the photo): ")
+    NUM_HOURS = int(input("Across how many hours in a day does your when2meet span?: "))
+    NUM_DAYS = int(input("Across how many days does your when2meet span?: "))
+    BOT_COUNT = 6
+    maker = photomaker(NUM_HOURS, NUM_DAYS, BOT_COUNT, IMAGE)
     for row in maker.grid:
         print(row)
 
+
     users = maker.users
 
-    curbot = 0
-    while curbot < maker.numVisitors:
-        u = maker.users[curbot]
-        try:
-            u.logIn()
-            u.enterAvailability()
-            curbot += 1
-        except Exception as e:
-            print("exception:", e)
+    driver = webdriver.Chrome('./chromedriver')
+    driver.get(LINK)
+    driver.maximize_window()
+
+    try:
+        for user in users:
+            user.logIn(driver)
+            user.enterAvailability(driver)
+
+            driver.refresh()
 
 
-    
-    # for i in range(startbot,len(users)):
-    #     u = maker.users[i]
-    #     u.logIn()
-    #     u.enterAvailability()
+    except Exception as e:
+        print("exception:", e)
+
 
 
 
