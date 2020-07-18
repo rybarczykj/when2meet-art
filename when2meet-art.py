@@ -224,8 +224,8 @@ def main():
     IMAGE = input("What's the filename of your image? (Be sure it's in the same folder as this file): ")
     LINK = input("What's the URL of the when2meet you want painted?: ")
 
-    NUM_HOURS = int(input("Across how many hours in a day does your when2meet span?: "))
     NUM_DAYS = int(input("Across how many days does your when2meet span?: "))
+    NUM_HOURS = int(input("Across how many hours in the day does your when2meet span? (0-24): "))
     BOT_COUNT = 6
     maker = photomaker(NUM_HOURS, NUM_DAYS, BOT_COUNT, IMAGE)
 
