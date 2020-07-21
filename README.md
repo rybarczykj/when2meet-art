@@ -1,6 +1,6 @@
 # when2meet-art
 
-www.when2meet.com is a simple web-based tool used to collaboratively schedule meetings. This tool takes advantage of the way when2meet presents results, a multi-shaded green gridlike calendar, to make fun pixel art on real schedules.
+www.when2meet.com is a popular web-based tool used to collaboratively schedule meetings. This tool takes advantage of the way when2meet presents results, a multi-shaded green gridlike calendar, to make fun pixel art on real schedules.
 
 
 Gif of the tool in action:
